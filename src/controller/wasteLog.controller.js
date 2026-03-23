@@ -33,24 +33,47 @@ async function createDustbin(req,res){
 }
 
 async function reduceCurrentFillLevel(req, res) {
-    try{
-        const role = req.user.role;
+  try {
+    const { dustbinId, weight, uid } = req.body;
 
-        if(role !== "admin"){
-            return res.status(403).json({ message: "Access denied. Admins only." });
-        }
+    const user = await userModel.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-        const { dustbinId, weight } = req.body;
-        
-        if(!dustbinId || !weight){
-            return res.status(400).json({ message: "Dustbin ID and weight are required" });
-        }
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
 
-        const dustbin = await dustbinModel.findByIdAndUpdate(new mongoose.Types.ObjectId(dustbinId), {
-            $inc: { currentFillLevel: -weight }
-        });
-        res.status(200).json({ message: "Dustbin fill level reduced successfully", dustbin });
-    }catch (err) {
+    if (!dustbinId || !weight) {
+      return res.status(400).json({ message: "Dustbin ID and weight are required" });
+    }
+
+    const dustbin = await dustbinModel.findById(dustbinId);
+
+    if (!dustbin) {
+      return res.status(404).json({ message: "Dustbin not found" });
+    }
+
+    
+    const removableWeight = Math.min(weight, dustbin.currentFillLevel);
+
+    const updatedDustbin = await dustbinModel.findByIdAndUpdate(
+      dustbinId,
+      { $inc: { currentFillLevel: -removableWeight } },
+      { returnDocument: "after" }
+    );
+
+    res.status(200).json({
+      message:
+        removableWeight < weight
+          ? `Only ${removableWeight} reduced (bin was nearly empty)`
+          : "Dustbin fill level reduced successfully",
+      reducedWeight: removableWeight,
+      dustbin: updatedDustbin
+    });
+
+  } catch (err) {
     res.status(500).json({
       message: "Server error",
       error: err.message
