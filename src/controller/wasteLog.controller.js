@@ -32,6 +32,32 @@ async function createDustbin(req,res){
     }
 }
 
+async function reduceCurrentFillLevel(req, res) {
+    try{
+        const role = req.user.role;
+
+        if(role !== "admin"){
+            return res.status(403).json({ message: "Access denied. Admins only." });
+        }
+
+        const { dustbinId, weight } = req.body;
+        
+        if(!dustbinId || !weight){
+            return res.status(400).json({ message: "Dustbin ID and weight are required" });
+        }
+
+        const dustbin = await dustbinModel.findByIdAndUpdate(new mongoose.Types.ObjectId(dustbinId), {
+            $inc: { currentFillLevel: -weight }
+        });
+        res.status(200).json({ message: "Dustbin fill level reduced successfully", dustbin });
+    }catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      error: err.message
+    });
+  }
+}
+
 async function logWasteDeposit(req, res) {
   try {
     const { uid, weight, dustbinId } = req.body;
@@ -107,5 +133,6 @@ async function logWasteDeposit(req, res) {
 
 module.exports = {
     logWasteDeposit,
-    createDustbin
+    createDustbin,
+    reduceCurrentFillLevel
 }

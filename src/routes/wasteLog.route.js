@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authUser } = require('../middleware/auth.middleware.js');
-const { logWasteDeposit,createDustbin } = require('../controller/wasteLog.controller.js');
+const { logWasteDeposit,createDustbin,reduceCurrentFillLevel } = require('../controller/wasteLog.controller.js');
 
 
 /**
@@ -10,6 +10,13 @@ const { logWasteDeposit,createDustbin } = require('../controller/wasteLog.contro
  * @access Private (admin only)
  */
 router.post("/dustbin/create",authUser,createDustbin);
+
+/**
+ * @route POST /api/iot/dustbin/reduce
+ * @desc Reduce current fill level of a dustbin (for maintenance)
+ * @access Private (admin only)
+ */
+router.post("/dustbin/reduce", authUser, reduceCurrentFillLevel);
 
 /**
  * @route POST /api/iot/deposit
