@@ -4,6 +4,10 @@ async function register(req, res) {
   try {
     const { name, email, password, rollNo } = req.body;
 
+    if(!email || !password || !name || !rollNo){
+        return res.status(400).json({ message: "Name, email, password, and roll number are required" });
+    }
+
     const query = [{ email }];
 
     if (rollNo) {
@@ -63,6 +67,11 @@ async function register(req, res) {
 async function login(req,res){
     const { identifier, password } = req.body;
     try{
+
+        if(!identifier || !password){
+            return res.status(400).json({ message: "Email/Roll number and password are required" });
+        }
+
         const user = await userModel.findOne({
             $or: [
                 { email: identifier },
