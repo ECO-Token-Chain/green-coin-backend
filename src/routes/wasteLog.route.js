@@ -16,7 +16,7 @@ router.post("/dustbin/create",authUser,createDustbin);
  * @desc Reduce current fill level of a dustbin (for maintenance)
  * @access Private (admin only)
  */
-router.post("/dustbin/reduce", authUser, reduceCurrentFillLevel);
+router.patch("/dustbin/reduce", reduceCurrentFillLevel);
 
 /**
  * @route POST /api/iot/deposit
