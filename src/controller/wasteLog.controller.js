@@ -36,7 +36,7 @@ async function reduceCurrentFillLevel(req, res) {
   try {
     const { dustbinId, weight, uid } = req.body;
 
-    const user = await userModel.findOne({ uid });
+    const user = await userModel.findOne({ uid: uid.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -92,7 +92,7 @@ async function logWasteDeposit(req, res) {
     }
 
     
-    const user = await userModel.findOne({ uid });
+    const user = await userModel.findOne({ uid: uid.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -101,6 +101,8 @@ async function logWasteDeposit(req, res) {
     if (!dustbin) {
       return res.status(404).json({ message: "Dustbin not found" });
     }
+
+    console.log(`DEBUG: Dustbin "${dustbin.name}" | Capacity: ${dustbin.capacity} | Current Fill: ${dustbin.currentFillLevel}`);
 
     const remainingCapacity = dustbin.capacity - dustbin.currentFillLevel;
 
