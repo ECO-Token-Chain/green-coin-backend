@@ -28,11 +28,20 @@ parser.on('data', async (data) => {
 
   if (uid && weight) {
     try {
-      console.log(` Sending to Backend: UID=${uid}, Weight=${weight}`);
+      const grams = parseFloat(weight);
+      const kilograms = grams / 1000;
+
+      if (isNaN(grams)) {
+        console.error(' ERROR: Weight is not a number:', weight);
+        return;
+      }
+
+      console.log(` Translating: ${grams}g -> ${kilograms.toFixed(3)}kg`);
+      console.log(` Sending to Backend: UID=${uid}, Weight=${kilograms.toFixed(3)}kg`);
 
       const response = await axios.post(apiUrl, {
         uid: uid,
-        weight: parseFloat(weight) / 1000, // Convert Grams to Kilograms
+        weight: kilograms,
         dustbinId: dustbinId
       });
 
