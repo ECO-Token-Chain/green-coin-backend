@@ -4,6 +4,8 @@ const userModel = require("../models/user.model.js");
 const dustbinModel = require("../models/dustbin.model.js");
 const rewardModel = require("../models/reward.model.js");
 const calculateReward = require("../utils/rewardCalculator.js");
+const { sendReward } = require("../utils/blockchain.js");
+
 
 async function createDustbin(req, res) {
   try {
@@ -160,7 +162,6 @@ async function logWasteDeposit(req, res) {
 
       await user.save();
 
-      // Update bin
       await dustbinModel.findByIdAndUpdate(new mongoose.Types.ObjectId(dustbinId), {
         $inc: { currentFillLevel: acceptedWeight }
       });
@@ -172,6 +173,13 @@ async function logWasteDeposit(req, res) {
           points: earnedPoints,
           weight: acceptedWeight
         });
+
+        if (user.walletAddress) {
+
+          sendReward(user.walletAddress, earnedPoints);
+        } else {
+          console.log(`[Blockchain] User ${user.name} earned points but has no walletAddress configured.`);
+        }
       }
 
       const responseMessage = isMaxLimitReached && earnedPoints === 0
