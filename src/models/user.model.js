@@ -49,6 +49,14 @@ const userSchema = new mongoose.Schema({
     points:{
         type:Number,
         default:0,
+    },
+    pointsEarnedToday:{
+        type:Number,
+        default:0,
+    },
+    lastPointUpdateDate:{
+        type:String,
+        default:"", // Stored as "YYYY-MM-DD" in IST
     }
 
 }, { timestamps: true });
