@@ -2,34 +2,36 @@ const mongoose = require("mongoose");
 const wasteLogModel = require("../models/waste.model.js");
 const userModel = require("../models/user.model.js");
 const dustbinModel = require("../models/dustbin.model.js");
+const rewardModel = require("../models/reward.model.js");
+const calculateReward = require("../utils/rewardCalculator.js");
 
-async function createDustbin(req,res){
-    try{
-        const role = req.user.role;
+async function createDustbin(req, res) {
+  try {
+    const role = req.user.role;
 
-        if(role !== "admin"){
-            return res.status(403).json({ message: "Access denied. Admins only." });
-        }
-
-        const { name , capacity } = req.body;
-
-        if(!name || !capacity){
-            return res.status(400).json({ message: "Name and capacity are required" });
-        }
-
-        const dustbin = await dustbinModel.create({
-            name,
-            capacity
-        });
-
-        res.status(201).json({ message: "Dustbin created successfully", dustbin });
-    } catch (err) {
-        res.status(500).json({
-            message: "Server error",
-            error: err.message
-        });
-
+    if (role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admins only." });
     }
+
+    const { name, capacity } = req.body;
+
+    if (!name || !capacity) {
+      return res.status(400).json({ message: "Name and capacity are required" });
+    }
+
+    const dustbin = await dustbinModel.create({
+      name,
+      capacity
+    });
+
+    res.status(201).json({ message: "Dustbin created successfully", dustbin });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      error: err.message
+    });
+
+  }
 }
 
 async function reduceCurrentFillLevel(req, res) {
@@ -54,8 +56,6 @@ async function reduceCurrentFillLevel(req, res) {
     if (!dustbin) {
       return res.status(404).json({ message: "Dustbin not found" });
     }
-
-    
     const removableWeight = Math.min(weight, dustbin.currentFillLevel);
 
     const updatedDustbin = await dustbinModel.findByIdAndUpdate(
@@ -85,13 +85,13 @@ async function logWasteDeposit(req, res) {
   try {
     const { uid, weight, dustbinId } = req.body;
 
-    if (!uid || !weight || !dustbinId) {
+    if (!uid || weight === undefined || weight === null || !dustbinId) {
       return res.status(400).json({
         message: "UID, weight, and dustbin ID are required"
       });
     }
 
-    
+
     const user = await userModel.findOne({ uid: uid.toLowerCase() });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -101,8 +101,6 @@ async function logWasteDeposit(req, res) {
     if (!dustbin) {
       return res.status(404).json({ message: "Dustbin not found" });
     }
-
-    console.log(`DEBUG: Dustbin "${dustbin.name}" | Capacity: ${dustbin.capacity} | Current Fill: ${dustbin.currentFillLevel}`);
 
     const remainingCapacity = dustbin.capacity - dustbin.currentFillLevel;
 
@@ -126,25 +124,31 @@ async function logWasteDeposit(req, res) {
     }
 
     if (acceptedWeight > 0) {
-      await Promise.all([
-        userModel.findByIdAndUpdate(user._id, {
-          $inc: { wasteDroppedToday: acceptedWeight }
-        }),
+      const weightInGram = acceptedWeight * 1000;
+      const points = calculateReward(weightInGram);
 
-        dustbinModel.findByIdAndUpdate(new mongoose.Types.ObjectId(dustbinId), {
-          $inc: { currentFillLevel: acceptedWeight }
-        })
-      ]);
+      user.wasteDroppedToday += weightInGram;
+      await user.save();
+
+      // Update bin
+      await dustbinModel.findByIdAndUpdate(new mongoose.Types.ObjectId(dustbinId), {
+        $inc: { currentFillLevel: acceptedWeight }
+      });
+
+      if (points > 0) {
+        await rewardModel.create({
+          userId: user._id,
+          wasteLogId: wasteLog?._id,
+          points: points,
+          weight: acceptedWeight
+        });
+      }
     }
 
     res.status(201).json({
-      message: acceptedWeight === 0
-        ? "Dustbin full, no waste accepted"
-        : acceptedWeight < weight
-          ? `Only ${acceptedWeight}kg accepted (bin almost full)`
-          : "Waste deposit logged successfully",
-      acceptedWeight,
-      rejectedWeight: weight - acceptedWeight,
+      message: "Waste added & rewarded",
+      weight: (acceptedWeight * 1000), // weight gram a a6a
+      points: calculateReward(acceptedWeight * 1000),
       wasteLog
     });
 
@@ -157,7 +161,7 @@ async function logWasteDeposit(req, res) {
 }
 
 module.exports = {
-    logWasteDeposit,
-    createDustbin,
-    reduceCurrentFillLevel
+  logWasteDeposit,
+  createDustbin,
+  reduceCurrentFillLevel
 }
