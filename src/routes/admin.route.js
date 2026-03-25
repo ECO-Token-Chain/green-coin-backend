@@ -9,13 +9,14 @@ const {
     deleteProduct
 } = require('../controller/admin.controller.js');
 const { authUser, isAdmin } = require('../middleware/auth.middleware.js');
+const upload = require('../middleware/multer.js');
 
 /**
  * @route POST /api/admin/products
  * @desc Add a new product
  * @access Private (Admin only)
  */
-router.post("/products", authUser, isAdmin, addProduct);
+router.post("/products", authUser, isAdmin, upload.single("image"), addProduct);
 
 /**
  * @route DELETE /api/admin/products/:id
