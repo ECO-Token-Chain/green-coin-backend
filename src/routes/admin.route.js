@@ -8,6 +8,7 @@ const {
     addProduct,
     deleteProduct
 } = require('../controller/admin.controller.js');
+const { getAllTransactions } = require('../controller/transaction.controller.js'); // 🚀 Import the transaction controller
 const { authUser, isAdmin } = require('../middleware/auth.middleware.js');
 const upload = require('../middleware/multer.js');
 
@@ -52,5 +53,12 @@ router.delete("/students/:id", authUser, isAdmin, deleteStudent);
  * @access Private (Admin only)
  */
 router.patch("/users/:id/promote", authUser, isAdmin, promoteToAdmin);
+
+/**
+ * @route GET /api/admin/transactions
+ * @desc Get all transactions (Rewards & Purchases)
+ * @access Private (Admin only)
+ */
+router.get("/transactions", authUser, isAdmin, getAllTransactions);
 
 module.exports = router;
