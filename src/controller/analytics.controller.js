@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const wasteLogModel = require('../models/waste.model.js');
 
 async function getCollegeWasteLast7Days(req, res) {
@@ -29,21 +30,20 @@ async function getCollegeWasteLast7Days(req, res) {
     ]);
 
     res.status(200).json({
-        message: "College waste data for the last 7 days retrieved successfully",
-        data
+      message: "College waste data for the last 7 days retrieved successfully",
+      data
     });
   } catch (err) {
     res.status(500).json({
-        message: "Server error",
-        error: err.message
+      message: "Server error",
+      error: err.message
     });
   }
 }
 
 async function getUserWasteLast7Days(req, res) {
   try {
-    const userId = req.user.id;
-
+    const userId = new mongoose.Types.ObjectId(req.user.id);
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
 
@@ -68,13 +68,13 @@ async function getUserWasteLast7Days(req, res) {
     ]);
 
     res.status(200).json({
-        message: "User waste data for the last 7 days retrieved successfully",
-        data
+      message: "User waste data for the last 7 days retrieved successfully",
+      data
     });
   } catch (err) {
     res.status(500).json({
-        message: "Server error",
-        error: err.message
+      message: "Server error",
+      error: err.message
     });
   }
 }
@@ -111,13 +111,13 @@ async function getUserWasteById(req, res) {
     ]);
 
     res.status(200).json({
-        message: "User waste data for the last 7 days retrieved successfully",
-        data
+      message: "User waste data for the last 7 days retrieved successfully",
+      data
     });
   } catch (err) {
     res.status(500).json({
-        message: "Server error",
-        error: err.message
+      message: "Server error",
+      error: err.message
     });
   }
 }
