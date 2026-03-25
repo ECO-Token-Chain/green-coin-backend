@@ -85,15 +85,16 @@ async function getUserWasteById(req, res) {
     if (role !== "admin") {
       return res.status(403).json({ message: "Access denied" });
     }
-    const { userId } = req.params;
-
+    const { id } = req.params;
+    const objectUserId = new mongoose.Types.ObjectId(id);
+    console.log(objectUserId);
     const last7Days = new Date();
     last7Days.setDate(last7Days.getDate() - 7);
 
     const data = await wasteLogModel.aggregate([
       {
         $match: {
-          userId: new mongoose.Types.ObjectId(userId),
+          userId: objectUserId,
           createdAt: { $gte: last7Days }
         }
       },
