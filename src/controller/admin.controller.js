@@ -1,4 +1,5 @@
 const userModel = require("../models/user.model.js");
+const productModel = require("../models/product.model.js");
 
 async function getAllStudents(req, res) {
     try{
@@ -88,10 +89,63 @@ async function promoteToAdmin(req, res) {
         });
     }
 }
+async function addProduct(req, res) {
+    try {
+        const { name, price, image } = req.body;
+        
+        // Basic validation
+        if (!name || !price || !image) {
+            return res.status(400).json({ message: "Product name, price, and image are required" });
+        }
+
+        const product = new productModel({
+            name,
+            price,
+            image
+        });
+
+        await product.save();
+
+        res.status(201).json({
+            message: "Product added successfully",
+            product
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: "Server error",
+            error: err.message
+        });
+    }
+}
+
+async function deleteProduct(req, res) {
+    try {
+        const { id } = req.params;
+        const product = await productModel.findByIdAndDelete(id);
+        
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.status(200).json({
+            message: "Product deleted successfully",
+            product
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: "Server error",
+            error: err.message
+        });
+    }
+}
 
 module.exports = {
     getAllStudents,
     updateStudentUID,
     deleteStudent,
-    promoteToAdmin
+    promoteToAdmin,
+    addProduct,
+    deleteProduct
 }
