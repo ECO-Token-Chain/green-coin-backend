@@ -210,8 +210,31 @@ async function logWasteDeposit(req, res) {
   }
 }
 
+async function getAllDustbins(req, res) {
+  try {
+    const role = req.user.role;
+
+    if (role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+    const dustbins = await dustbinModel.find();
+    res.status(200).json({
+      success: true,
+      message: "Dustbins retrieved successfully",
+      dustbins
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message
+    });
+  }
+}
+
 module.exports = {
   logWasteDeposit,
   createDustbin,
-  reduceCurrentFillLevel
+  reduceCurrentFillLevel,
+  getAllDustbins
 }
