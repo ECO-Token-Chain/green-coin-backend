@@ -235,6 +235,19 @@ Welcome to the Green Coin Backend API documentation. This API handles user authe
 **Endpoint:** `GET /api/analytics/weekly/user/:id`  
 **Access:** Private (Admin only)  
 
+### 4. Total Waste Analytics
+**Endpoint:** `GET /api/analytics/total`  
+**Access:** Private (Authenticated users)  
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "totalWasteGram": 1250,
+  "totalWasteKG": "1.25",
+  "message": "Total waste weight retrieved successfully"
+}
+```
+
 ---
 
 ## Error Handling
