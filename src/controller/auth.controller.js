@@ -75,8 +75,7 @@ async function login(req,res){
         const user = await userModel.findOne({
             $or: [
                 { email: identifier },
-                { rollNo: Number(identifier)  }
-            ]
+                { rollNo: identifier }  ]
         }).select('+password');
 
         if (!user) {
