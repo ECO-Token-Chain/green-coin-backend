@@ -19,8 +19,12 @@ const wasteLogSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-
+  imageUrl: {
+    type: String,
+    default: null
+  },
   createdAt: {
+
     type: Date,
     default: Date.now
   }
