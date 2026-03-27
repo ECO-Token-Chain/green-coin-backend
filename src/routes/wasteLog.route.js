@@ -46,11 +46,8 @@ router.post("/deposit", logWasteDeposit);
  * STEP 2 — Phone App
  * @route POST /api/iot/deposit/complete
  * @desc Receive UID + Image from phone;
- *       Gemini verifies the item weight, then finalizes the deposit & rewards
- * @body  uid  (text field)
- * @body  image (file — multipart/form-data)
- * @access Public (Phone camera)
+
  */
 router.post("/deposit/complete", upload.single('image'), completeDepositWithImage);
 
-module.exports = router;
+module.exports = router;
