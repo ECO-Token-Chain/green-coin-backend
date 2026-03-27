@@ -19,7 +19,7 @@ async function createDustbin(req, res) {
       return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
-    const { name, capacity } = req.body;
+    const { name, capacity, wasteType } = req.body;
 
     if (!name || !capacity) {
       return res.status(400).json({ message: "Name and capacity are required" });
@@ -27,7 +27,8 @@ async function createDustbin(req, res) {
 
     const dustbin = await dustbinModel.create({
       name,
-      capacity
+      capacity,
+      wasteType
     });
 
     res.status(201).json({ message: "Dustbin created successfully", dustbin });
@@ -43,7 +44,7 @@ async function createDustbin(req, res) {
 async function reduceCurrentFillLevel(req, res) {
   try {
     const { dustbinId, weight, uid } = req.body;
-    if(!uid){
+    if (!uid) {
       await notificationModel.create({
         message: `Unauthorized attempt to reduce fill level of dustbin ${dustbinId} with missing UID please check the cctv footage for more details`,
       });
@@ -144,7 +145,7 @@ async function completeDepositWithImage(req, res) {
     const { uid } = req.body;
 
     if (!uid) return res.status(400).json({ message: "UID is required" });
-    if (!req.file)  return res.status(400).json({ message: "Image is required" });
+    if (!req.file) return res.status(400).json({ message: "Image is required" });
 
     // 1. Find the pending session
     const pending = await pendingDepositModel.findOne({ uid: uid.toLowerCase() });
@@ -220,6 +221,24 @@ async function completeDepositWithImage(req, res) {
       });
 
       const potentialPoints = calculateReward(acceptedWeight);
+
+      // ── Bin-type vs AI-detected waste type ─────────────────────────────────
+      // dustbin.wasteType  → "wet" or "dry"  (set when the bin was created)
+      // estimate.wasteType → always "dry" for now (Gemini hardcoded)
+      // If they don't match the user placed waste in the WRONG bin → half reward
+      const isWrongBin = estimate.wasteType !== dustbin.wasteType;
+      const adjustedPotential = isWrongBin
+        ? Math.floor(potentialPoints / 2)
+        : potentialPoints;
+
+      if (isWrongBin) {
+        console.log(
+          `[BinType] Mismatch — waste is "${estimate.wasteType}" but bin is "${dustbin.wasteType}". ` +
+          `Reward halved: ${potentialPoints} → ${adjustedPotential}`
+        );
+      }
+      // ───────────────────────────────────────────────────────────────────────
+
       const todayIST = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Kolkata",
         year: "numeric",
@@ -236,8 +255,8 @@ async function completeDepositWithImage(req, res) {
         isMaxLimitReached = true;
       } else {
         const available = 200 - user.pointsEarnedToday;
-        earnedPoints = Math.min(potentialPoints, available);
-        if (earnedPoints < potentialPoints) isMaxLimitReached = true;
+        earnedPoints = Math.min(adjustedPotential, available);
+        if (earnedPoints < adjustedPotential) isMaxLimitReached = true;
       }
 
       user.wasteDroppedToday += acceptedWeight;
@@ -266,6 +285,9 @@ async function completeDepositWithImage(req, res) {
         ? "Max limit exceeded. Try tomorrow."
         : "✅ Waste verified & rewarded!",
       objectDetected: estimate.objectName,
+      detectedWasteType: estimate.wasteType,
+      binWasteType: dustbin.wasteType,
+      wrongBin: estimate.wasteType !== dustbin.wasteType,
       weight: acceptedWeight,
       points: earnedPoints,
       imageUrl,
