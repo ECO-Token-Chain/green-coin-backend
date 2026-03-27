@@ -49,6 +49,7 @@ Respond ONLY in this JSON format (no extra text):
     objectName: parsed.objectName || "Unknown",
     minGrams: Number(parsed.minGrams) || 0,
     maxGrams: Number(parsed.maxGrams) || 9999,
+    wasteType: "dry"
   };
 }
 
