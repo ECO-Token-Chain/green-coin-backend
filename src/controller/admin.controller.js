@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model.js");
 const productModel = require("../models/product.model.js");
+const notificationModel = require("../models/notification.model.js");
 const getDataUri = require("../utils/dataUri.js");
 const cloudinary = require("../utils/cloudinary.js");
 
@@ -175,6 +176,26 @@ async function getStudentById(req, res) {
     }
 }
 
+async function getNotificitations(req,res){
+    try{
+        const role = req.user.role;
+        if (role !== "admin") {
+          return res.status(403).json({ message: "Access denied. Admins only." });
+        }
+        const notifications = await notificationModel.find().sort({ createdAt: -1 });
+        res.status(200).json({
+            message: "Notifications retrieved successfully",
+            notifications
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Server error",
+            error: err.message
+        });
+
+    }
+}
+
 module.exports = {
     getAllStudents,
     updateStudentUID,
@@ -182,5 +203,6 @@ module.exports = {
     promoteToAdmin,
     addProduct,
     deleteProduct,
-    getStudentById
+    getStudentById,
+    getNotificitations
 }
