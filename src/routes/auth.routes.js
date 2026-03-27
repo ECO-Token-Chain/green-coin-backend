@@ -18,6 +18,17 @@ router.post("/register", register);
 router.post("/login", login);
 
 /**
+ * @route POST /api/auth/logout
+ * @desc Logout user by clearing cookie
+ * @access Private
+ */
+router.post("/logout", authUser, (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ message: "Logout successful" });
+});
+
+
+/**
  * @route POST /api/auth/getMe
  * @desc Get current logged in user details
  * @access Private
