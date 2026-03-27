@@ -13,16 +13,21 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 async function estimateWeightRange(imageBuffer, mimeType) {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const prompt = `You are a smart waste-management AI. 
-Look at the item in this image and estimate its weight in grams when EMPTY / in its natural state (e.g., an empty plastic bottle, a dry plastic packet, a cardboard box, etc.).
+  const prompt = `You are a smart waste-management AI.
+Look at the item in this image and:
+1. Estimate its weight in grams when EMPTY / in its natural state (e.g., an empty plastic bottle, a dry plastic packet, a cardboard box).
+2. Classify the waste type as either "wet" or "dry".
+   - "dry" = plastics, paper, cardboard, metal, glass, e-waste, packaging, cloth, rubber, etc.
+   - "wet" = food scraps, fruit/vegetable peels, cooked food, organic leftovers, tea bags, flowers, etc.
 
-IMPORTANT: Ignore any water, stones, sand, or other added material the item might contain. Only estimate the weight of the item itself.
+IMPORTANT: Ignore any water, stones, sand, or other added material. Only estimate the weight of the item itself.
 
-Respond ONLY in this JSON format (no extra text):
+Respond ONLY in this exact JSON format (no extra text, no markdown):
 {
   "objectName": "<name of the item>",
   "minGrams": <minimum expected weight as a number>,
-  "maxGrams": <maximum expected weight as a number>
+  "maxGrams": <maximum expected weight as a number>,
+  "wasteType": "<wet or dry>"
 }`;
 
   const imagePart = {
@@ -49,7 +54,7 @@ Respond ONLY in this JSON format (no extra text):
     objectName: parsed.objectName || "Unknown",
     minGrams: Number(parsed.minGrams) || 0,
     maxGrams: Number(parsed.maxGrams) || 9999,
-    wasteType: "dry"
+    wasteType: parsed.wasteType === "wet" ? "wet" : "dry",
   };
 }
 
