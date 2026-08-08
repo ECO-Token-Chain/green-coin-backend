@@ -36,12 +36,12 @@ parser.on('data', async (data) => {
         return;
       }
 
-      console.log(` Translating: ${grams}g -> ${kilograms.toFixed(3)}kg`);
-      console.log(` Sending to Backend: UID=${uid}, Weight=${kilograms.toFixed(3)}kg`);
+      console.log(` Translating: ${grams}g`);
+      console.log(` Sending to Backend: UID=${uid}, Weight=${grams.toFixed(2)}g`); // Now sending GRAMS
 
       const response = await axios.post(apiUrl, {
         uid: uid,
-        weight: kilograms,
+        weight: grams, // No longer converting to KG
         dustbinId: dustbinId
       });
 
