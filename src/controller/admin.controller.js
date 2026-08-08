@@ -1,10 +1,12 @@
 const userModel = require("../models/user.model.js");
 const productModel = require("../models/product.model.js");
+const getDataUri = require("../utils/dataUri.js");
+const cloudinary = require("../utils/cloudinary.js");
 
 async function getAllStudents(req, res) {
-    try{
+    try {
         const role = req.user.role;
-        if(role !== "admin"){
+        if (role !== "admin") {
             return res.status(403).json({ message: "Access denied" });
         }
         const students = await userModel.find({ role: "user" }).select("-password");
@@ -21,15 +23,15 @@ async function getAllStudents(req, res) {
     }
 }
 async function updateStudentUID(req, res) {
-    try{
+    try {
         const role = req.user.role;
-        if(role !== "admin"){
+        if (role !== "admin") {
             return res.status(403).json({ message: "Access denied" });
         }
         const { id } = req.params;
         const { uid } = req.body;
         const student = await userModel.findByIdAndUpdate(id, { uid: uid.toLowerCase() }, { returnDocument: "after" }).select("-password");
-        if(!student){
+        if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
         res.status(200).json({
@@ -45,14 +47,14 @@ async function updateStudentUID(req, res) {
 }
 
 async function deleteStudent(req, res) {
-    try{
+    try {
         const role = req.user.role;
-        if(role !== "admin"){
+        if (role !== "admin") {
             return res.status(403).json({ message: "Access denied" });
         }
         const { id } = req.params;
         const student = await userModel.findByIdAndDelete(id).select("-password");
-        if(!student){
+        if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
         res.status(200).json({
@@ -68,14 +70,14 @@ async function deleteStudent(req, res) {
     }
 }
 async function promoteToAdmin(req, res) {
-    try{
+    try {
         const role = req.user.role;
-        if(role !== "admin"){
+        if (role !== "admin") {
             return res.status(403).json({ message: "Access denied" });
         }
         const { id } = req.params;
         const user = await userModel.findByIdAndUpdate(id, { role: "admin" }, { returnDocument: "after" }).select("-password");
-        if(!user){
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
         res.status(200).json({
@@ -91,17 +93,28 @@ async function promoteToAdmin(req, res) {
 }
 async function addProduct(req, res) {
     try {
-        const { name, price, image } = req.body;
-        
-        // Basic validation
-        if (!name || !price || !image) {
+        const { name, price } = req.body;
+        const file = req.file;
+
+        if (!name || !price || !file) {
             return res.status(400).json({ message: "Product name, price, and image are required" });
         }
 
+        // Convert price to a Number to avoid validation errors
+        const parsedPrice = Number(price);
+        if (isNaN(parsedPrice)) {
+            return res.status(400).json({ message: "Invalid price format. Price must be a number." });
+        }
+
+        const fileUri = getDataUri(file);
+
+
+        const myCloud = await cloudinary.uploader.upload(fileUri.content);
+
         const product = new productModel({
             name,
-            price,
-            image
+            price: parsedPrice,
+            image: myCloud.secure_url
         });
 
         await product.save();
@@ -123,7 +136,7 @@ async function deleteProduct(req, res) {
     try {
         const { id } = req.params;
         const product = await productModel.findByIdAndDelete(id);
-        
+
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
