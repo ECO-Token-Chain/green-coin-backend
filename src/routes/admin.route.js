@@ -7,7 +7,8 @@ const {
     promoteToAdmin,
     addProduct,
     deleteProduct,
-    getStudentById
+    getStudentById,
+    getNotificitations
 } = require('../controller/admin.controller.js');
 const { getAllTransactions } = require('../controller/transaction.controller.js'); //  Import the transaction controller
 const { authUser, isAdmin } = require('../middleware/auth.middleware.js');
@@ -70,5 +71,12 @@ router.patch("/users/:id/promote", authUser, isAdmin, promoteToAdmin);
  * @access Private (Admin only)
  */
 router.get("/transactions", authUser, isAdmin, getAllTransactions);
+
+/**
+ * @route GET /api/admin/notifications
+ * @desc Get all notifications
+ * @access Private (Admin only)
+ */
+router.get("/notifications", authUser, isAdmin, getNotificitations);
 
 module.exports = router;

@@ -4,8 +4,8 @@ const userModel = require("../models/user.model.js");
 const dustbinModel = require("../models/dustbin.model.js");
 const rewardModel = require("../models/reward.model.js");
 const calculateReward = require("../utils/rewardCalculator.js");
+const notificationModel = require("../models/notification.model.js");
 const { sendReward } = require("../utils/blockchain.js");
-
 
 async function createDustbin(req, res) {
   try {
@@ -39,13 +39,25 @@ async function createDustbin(req, res) {
 async function reduceCurrentFillLevel(req, res) {
   try {
     const { dustbinId, weight, uid } = req.body;
-
+    if(!uid){
+      await notificationModel.create({
+        message: `Unauthorized attempt to reduce fill level of dustbin ${dustbinId} with missing UID please check the cctv footage for more details`,
+      });
+      return res.status(400).json({ message: "UID is required" });
+    }
     const user = await userModel.findOne({ uid: uid.toLowerCase() });
     if (!user) {
+      await notificationModel.create({
+        message: `Unauthorized attempt to reduce fill level of dustbin ${dustbinId} by unknown UID ${uid}`,
+      });
       return res.status(404).json({ message: "User not found" });
     }
 
     if (user.role !== "admin") {
+      const fraudUser = await userModel.findOne({ uid: uid.toLowerCase() });
+      await notificationModel.create({
+        message: `Unauthorized attempt to reduce fill level of dustbin ${dustbinId} by user ${fraudUser.name} (${fraudUser.rollNo}) with UID ${uid}`,
+      });
       return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
