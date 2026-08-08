@@ -123,8 +123,39 @@ async function getUserWasteById(req, res) {
   }
 }
 
+async function getTotalWasteWeight(req, res) {
+  try {
+    const result = await wasteLogModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalWeight: { $sum: "$weight" }
+        }
+      }
+    ]);
+
+    const totalWeight = result.length > 0 ? result[0].totalWeight : 0;
+    const totalKG = (totalWeight / 1000).toFixed(2);
+
+    res.status(200).json({
+      success: true,
+      totalWasteGram: totalWeight,
+      totalWasteKG: totalKG,
+      message: "Total waste weight retrieved successfully"
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message
+    });
+  }
+}
+
 module.exports = {
   getCollegeWasteLast7Days,
   getUserWasteLast7Days,
-  getUserWasteById
+  getUserWasteById,
+  getTotalWasteWeight
 };
