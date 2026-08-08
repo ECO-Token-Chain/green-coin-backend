@@ -9,9 +9,9 @@ const contractAddress = process.env.CONTRACT_ADDRESS;
 
 
 const contractABI = [
-
   "function mint(address to, uint256 amount) public",
-  "function rewardStudent(address student, uint256 amount) public"
+  "function rewardStudent(address student, uint256 amount) public",
+  "function balanceOf(address owner) view returns (uint256)"
 ];
 
 const greenCoinContract = new ethers.Contract(contractAddress, contractABI, wallet);
