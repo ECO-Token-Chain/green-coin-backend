@@ -124,7 +124,7 @@ async function logWasteDeposit(req, res) {
     }
 
     if (acceptedWeight > 0) {
-      const weightInGram = acceptedWeight * 1000;
+      const weightInGram = acceptedWeight; // serial.js now sends GRAMS directly!
       const points = calculateReward(weightInGram);
 
       user.wasteDroppedToday += weightInGram;
@@ -147,8 +147,8 @@ async function logWasteDeposit(req, res) {
 
     res.status(201).json({
       message: "Waste added & rewarded",
-      weight: (acceptedWeight * 1000), // weight gram a a6a
-      points: calculateReward(acceptedWeight * 1000),
+      weight: acceptedWeight, // already in Grams
+      points: calculateReward(acceptedWeight),
       wasteLog
     });
 
