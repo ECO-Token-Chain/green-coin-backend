@@ -30,7 +30,7 @@ async function register(req, res) {
       password,
       role: "user",
       rollNo
-    });
+    }).sellect('-password');
 
     const token = jwt.sign({
       id: newUser._id,
@@ -45,15 +45,7 @@ async function register(req, res) {
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: {
-        _id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        rollNo: newUser.rollNo,
-        uid: newUser.uid,
-        wasteDroppedToday: newUser.wasteDroppedToday,
-      }
+      user: newUser
     });
 
   } catch (err) {
@@ -105,15 +97,7 @@ async function login(req,res){
 
         res.status(200).json({
             message: 'Login successful',
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                rollNo: user.rollNo,
-                uid: user.uid,
-                wasteDroppedToday: user.wasteDroppedToday,
-            }
+            user
         });
     } catch (err) {
         res.status(500).json({
@@ -130,15 +114,7 @@ async function getMe(req,res){
 
         res.status(200).json({
             message: 'User details fetched successfully',
-            user:{
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                rollNo: user.rollNo,
-                uid: user.uid,
-                wasteDroppedToday: user.wasteDroppedToday,
-            }
+            user
         })
     }catch(err){
         res.status(500).json({
