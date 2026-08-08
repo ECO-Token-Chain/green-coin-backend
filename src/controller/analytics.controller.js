@@ -1,4 +1,4 @@
-const wasteLogModel = require('../models/wasteLog.model.js');
+const wasteLogModel = require('../models/waste.model.js');
 
 async function getCollegeWasteLast7Days(req, res) {
   try {
