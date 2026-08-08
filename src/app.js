@@ -12,7 +12,7 @@ const vendorRouter = require('./routes/vendor.route.js');
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://camera-model-rho.vercel.app"],
     credentials: true,
 }));
 app.use(cookieParser());
