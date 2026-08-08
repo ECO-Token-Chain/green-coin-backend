@@ -25,8 +25,13 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'admin', 'central_admin'],
         default: 'user',
+    },
+    panchayat: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Panchayat',
+        default: null
     },
     uid: {
         type: String,

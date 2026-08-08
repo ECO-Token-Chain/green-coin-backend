@@ -19,6 +19,16 @@ const dustbinSchema = new mongoose.Schema({
         required: true,
         enum: ["wet", "dry"],
         default: "dry"
+    },
+    panchayat: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Panchayat',
+        default: null
+    },
+    location: {
+        type: String,
+        trim: true,
+        default: ""
     }
 }, { timestamps: true });
 

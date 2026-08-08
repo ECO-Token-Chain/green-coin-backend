@@ -14,6 +14,7 @@ const app = express();
 app.use(cors({
     origin: [
         "http://localhost:5173", 
+        "http://localhost:5174",
         "https://camera-model-rho.vercel.app", 
         "https://green-coin-frontend.vercel.app",
         process.env.FRONTEND_URL
