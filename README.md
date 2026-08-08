@@ -96,7 +96,22 @@ Welcome to the Green Coin Backend API documentation. This API handles user authe
 }
 ```
 
-### 2. Reduce Dustbin Fill Level
+### 2. Get All Dustbins
+**Endpoint:** `GET /api/iot/dustbins`  
+**Access:** Private (Authenticated users)  
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Dustbins retrieved successfully",
+  "dustbins": [
+    { "_id": "...", "name": "Bin A1", "capacity": 5000, "currentFillLevel": 120, ... },
+    ...
+  ]
+}
+```
+
+### 3. Reduce Dustbin Fill Level
 **Endpoint:** `PATCH /api/iot/dustbin/reduce`  
 **Access:** Private (Admin only - Requires UID in body)  
 **Input (JSON Body):**
