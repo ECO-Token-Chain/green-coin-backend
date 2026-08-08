@@ -2,6 +2,7 @@ require('dotenv').config();
 const app = require('./src/app');
 const connectDB = require('./src/config/database');
 
+require('./src/utils/resetWastedroppedToday.js');
 connectDB();
 
 app.listen(3000,()=>{
