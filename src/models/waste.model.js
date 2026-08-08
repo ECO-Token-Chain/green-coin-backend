@@ -6,6 +6,11 @@ const wasteLogSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
+  dustbinId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Dustbin",
+    required: true
+  },
   uid: {
     type: String,
     required: true
