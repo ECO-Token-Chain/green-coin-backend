@@ -176,7 +176,7 @@ async function logWasteDeposit(req, res) {
 
         if (user.walletAddress) {
 
-          sendReward(user.walletAddress, earnedPoints);
+          sendReward(user.walletAddress, earnedPoints, user.uid);
         } else {
           console.log(`[Blockchain] User ${user.name} earned points but has no walletAddress configured.`);
         }
