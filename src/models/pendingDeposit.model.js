@@ -24,7 +24,7 @@ const pendingDepositSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
     // TTL: MongoDB will auto-delete this document 120 seconds after createdAt
-    expires: 120,
+    expires: 300,
   },
 });
 

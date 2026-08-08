@@ -16,7 +16,7 @@ const contractABI = [
   "function transfer(address to, uint256 amount) public returns (bool)"
 ];
 
-const greenCoinContract = new ethers.Contract(contractAddress, contractABI, wallet);
+const BIN2COINContract = new ethers.Contract(contractAddress, contractABI, wallet);
 
 async function sendReward(studentAddress, points, uid) {
   try {
@@ -25,7 +25,7 @@ async function sendReward(studentAddress, points, uid) {
 
     console.log(`[Blockchain] Starting reward of ${points} GC to ${studentAddress}...`);
 
-    const tx = await greenCoinContract.mint(studentAddress, tokenAmount);
+    const tx = await BIN2COINContract.mint(studentAddress, tokenAmount);
 
     console.log(`[Blockchain] Transaction sent! Hash: ${tx.hash}`);
 
@@ -74,7 +74,7 @@ async function transferTokens(studentWalletAddress, vendorAddress, amount, uid) 
     
     // Since we removed frontend MetaMask approval, the Admin wallet acts as the central treasury.
     // The Admin transfers tokens directly to the vendor. The student's database points are deducted.
-    const tx = await greenCoinContract.transfer(vendorAddress, amountInWei);
+    const tx = await BIN2COINContract.transfer(vendorAddress, amountInWei);
     
     console.log(`[Blockchain] Transaction sent! Hash: ${tx.hash}`);
     const receipt = await tx.wait();
@@ -113,7 +113,7 @@ async function transferTokens(studentWalletAddress, vendorAddress, amount, uid) 
 module.exports = {
   provider,
   wallet,
-  greenCoinContract,
+  BIN2COINContract,
   sendReward,
   transferTokens
 };

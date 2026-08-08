@@ -46,7 +46,6 @@ router.post("/deposit", logWasteDeposit);
  * STEP 2 — Phone App
  * @route POST /api/iot/deposit/complete
  * @desc Receive UID + Image from phone;
-
  */
 router.post("/deposit/complete", upload.single('image'), completeDepositWithImage);
 

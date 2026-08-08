@@ -1,5 +1,5 @@
 const { ethers } = require("ethers");
-const { greenCoinContract } = require("../utils/blockchain.js");
+const { BIN2COINContract } = require("../utils/blockchain.js");
 const User = require("../models/user.model.js");
 const Transaction = require("../models/transaction.model.js");
 
@@ -15,7 +15,7 @@ async function getWalletBalance(req, res) {
         }
 
         const walletAddress = user.walletAddress;
-        const balance = await greenCoinContract.balanceOf(walletAddress);
+        const balance = await BIN2COINContract.balanceOf(walletAddress);
 
         const formattedBalance = ethers.formatUnits(balance, 18);
 

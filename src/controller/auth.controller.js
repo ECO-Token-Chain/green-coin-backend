@@ -4,8 +4,8 @@ async function register(req, res) {
   try {
     const { name, email, password, rollNo } = req.body;
 
-    if(!email || !password || !name || !rollNo){
-        return res.status(400).json({ message: "Name, email, password, and roll number are required" });
+    if (!email || !password || !name || !rollNo) {
+      return res.status(400).json({ message: "Name, email, password, and roll number are required" });
     }
 
     const query = [{ email }];
@@ -30,7 +30,7 @@ async function register(req, res) {
       password,
       role: "user",
       rollNo
-    }).sellect('-password');
+    }).select('-password');
 
     const token = jwt.sign({
       id: newUser._id,
@@ -39,8 +39,8 @@ async function register(req, res) {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === 'production', // Only true in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     res.status(201).json({
@@ -56,76 +56,81 @@ async function register(req, res) {
   }
 }
 
-async function login(req,res){
-    const { identifier, password } = req.body;
-    try{
-
-        if(!identifier || !password){
-            return res.status(400).json({ message: "Email/Roll number and password are required" });
-        }
-
-        const user = await userModel.findOne({
-            $or: [
-                { email: identifier },
-                { rollNo: identifier }  ]
-        }).select('+password');
-
-        if (!user) {
-            return res.status(400).json({
-                message: 'Invalid credentials'
-            });
-        }
-
-        const isMatch = await user.comparePassword(password);
-
-        if (!isMatch) {
-            return res.status(400).json({
-                message: 'Invalid credentials'
-            });
-        }
-
-        const token = jwt.sign({
-            id: user._id,
-            role: user.role
-        }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-        });
-
-        res.status(200).json({
-            message: 'Login successful',
-            user
-        });
-    } catch (err) {
-        res.status(500).json({
-            message: "Server error",
-            error: err.message
-        });
+async function login(req, res) {
+  const { identifier, password } = req.body;
+  try {
+    if (!identifier || !password) {
+      return res.status(400).json({ message: "Email/Roll number and password are required" });
     }
+
+    const user = await userModel.findOne({
+      $or: [
+        { email: identifier },
+        { rollNo: identifier }]
+    }).select('+password');
+
+    if (!user) {
+      return res.status(400).json({
+        message: 'Invalid credentials'
+      });
+    }
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: 'Invalid credentials'
+      });
+    }
+
+    const token = jwt.sign({
+      id: user._id,
+      role: user.role
+    }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // res.cookie("token", token, {
+    //     httpOnly: true,
+    //     secure: true,
+    //     sameSite: "none",
+    // });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Only true in production
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
+
+    res.status(200).json({
+      message: 'Login successful',
+      user
+    });
+  } catch (err) {
+    console.error("Login Error details:", err);
+    res.status(500).json({
+      message: "Server error",
+      error: err.message
+    });
+  }
 }
 
-async function getMe(req,res){
-    try{
-        const userId = req.user.id;
-        const user = await userModel.findById(userId);
+async function getMe(req, res) {
+  try {
+    const userId = req.user.id;
+    const user = await userModel.findById(userId);
 
-        res.status(200).json({
-            message: 'User details fetched successfully',
-            user
-        })
-    }catch(err){
-        res.status(500).json({
-            message: "Server error",
-            error: err.message
-        });
-    }
+    res.status(200).json({
+      message: 'User details fetched successfully',
+      user
+    })
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      error: err.message
+    });
+  }
 }
 
 module.exports = {
-    register,
-    login,
-    getMe
+  register,
+  login,
+  getMe
 }
