@@ -1,20 +1,26 @@
 const mongoose = require('mongoose');
 
 const dustbinSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true
     },
-    currentFillLevel:{
-        type:Number,
-        required:true,
-        default:0
+    currentFillLevel: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    capacity:{
-        type:Number,
-        required:true,
+    capacity: {
+        type: Number,
+        required: true,
+    },
+    wasteType: {
+        type: String,
+        required: true,
+        enum: ["wet", "dry"],
+        default: "dry"
     }
-},{timestamps:true});
+}, { timestamps: true });
 
 const dustbinModel = mongoose.model('Dustbin', dustbinSchema);
 module.exports = dustbinModel;
