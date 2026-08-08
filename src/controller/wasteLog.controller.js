@@ -124,10 +124,40 @@ async function logWasteDeposit(req, res) {
     }
 
     if (acceptedWeight > 0) {
-      const weightInGram = acceptedWeight; // serial.js now sends GRAMS directly!
-      const points = calculateReward(weightInGram);
+      const weightInGram = acceptedWeight;
+      const potentialPoints = calculateReward(weightInGram);
+      const todayIST = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
+
+
+      if (user.lastPointUpdateDate !== todayIST) {
+        user.pointsEarnedToday = 0;
+        user.lastPointUpdateDate = todayIST;
+      }
+
+      let earnedPoints = 0;
+      let isMaxLimitReached = false;
+
+      if (user.pointsEarnedToday >= 200) {
+        earnedPoints = 0;
+        isMaxLimitReached = true;
+      } else {
+        const availablePoints = 200 - user.pointsEarnedToday;
+        earnedPoints = Math.min(potentialPoints, availablePoints);
+
+        if (earnedPoints < potentialPoints) {
+          isMaxLimitReached = true;
+        }
+      }
 
       user.wasteDroppedToday += weightInGram;
+      user.pointsEarnedToday += earnedPoints;
+      user.points += earnedPoints;
+
       await user.save();
 
       // Update bin
@@ -135,20 +165,32 @@ async function logWasteDeposit(req, res) {
         $inc: { currentFillLevel: acceptedWeight }
       });
 
-      if (points > 0) {
+      if (earnedPoints > 0) {
         await rewardModel.create({
           userId: user._id,
           wasteLogId: wasteLog?._id,
-          points: points,
+          points: earnedPoints,
           weight: acceptedWeight
         });
       }
+
+      const responseMessage = isMaxLimitReached && earnedPoints === 0
+        ? "Max limit exceed. Try in next date."
+        : "Waste added & rewarded";
+
+      return res.status(201).json({
+        message: responseMessage,
+        weight: acceptedWeight,
+        points: earnedPoints,
+        wasteLog
+      });
     }
+
 
     res.status(201).json({
       message: "Waste added & rewarded",
-      weight: acceptedWeight, // already in Grams
-      points: calculateReward(acceptedWeight),
+      weight: 0,
+      points: 0,
       wasteLog
     });
 
