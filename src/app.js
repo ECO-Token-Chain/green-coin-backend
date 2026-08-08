@@ -6,6 +6,7 @@ const wasteLogRouter = require('./routes/wasteLog.route.js');
 const adminRouter = require('./routes/admin.route.js');
 const productRouter = require('./routes/product.routes.js');
 const leaderboardRouter = require('./routes/leaderboard.route.js');
+const analyticsRouter = require('./routes/analytics.route.js');
 const app = express();
 
 app.use(cors());
@@ -17,4 +18,5 @@ app.use('/api/iot', wasteLogRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/products', productRouter);
 app.use('/api/leaderboard', leaderboardRouter);
+app.use('/api/analytics', analyticsRouter);
 module.exports = app;
