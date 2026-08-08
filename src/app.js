@@ -8,10 +8,11 @@ const productRouter = require('./routes/product.routes.js');
 const userRouter = require('./routes/user.routes.js');
 const leaderboardRouter = require('./routes/leaderboard.route.js');
 const analyticsRouter = require('./routes/analytics.route.js');
+const vendorRouter = require('./routes/vendor.route.js');
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173", 
+    origin: "http://localhost:5173",
     credentials: true,
 }));
 app.use(cookieParser());
@@ -24,4 +25,5 @@ app.use('/api/products', productRouter);
 app.use('/api/user', userRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/vendor', vendorRouter);
 module.exports = app;

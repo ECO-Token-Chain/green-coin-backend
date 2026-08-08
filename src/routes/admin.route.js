@@ -6,9 +6,11 @@ const {
     deleteStudent,
     promoteToAdmin,
     addProduct,
-    deleteProduct
+    deleteProduct,
+    getStudentById,
+    getNotificitations
 } = require('../controller/admin.controller.js');
-const { getAllTransactions } = require('../controller/transaction.controller.js'); // 🚀 Import the transaction controller
+const { getAllTransactions } = require('../controller/transaction.controller.js'); //  Import the transaction controller
 const { authUser, isAdmin } = require('../middleware/auth.middleware.js');
 const upload = require('../middleware/multer.js');
 
@@ -34,6 +36,13 @@ router.delete("/products/:id", authUser, isAdmin, deleteProduct);
 router.get("/students", authUser, isAdmin, getAllStudents);
 
 /**
+ * @route GET /api/admin/students/:id
+ * @desc Get a student by ID
+ * @access Private (Admin only)
+ */
+router.get("/students/:id", authUser, isAdmin, getStudentById);
+
+/**
  * @route PATCH /api/admin/students/:id/uid
  * @desc Update student's UID
  * @access Private (Admin only)
@@ -46,6 +55,8 @@ router.patch("/students/:id/uid", authUser, isAdmin, updateStudentUID);
  * @access Private (Admin only)
  */
 router.delete("/students/:id", authUser, isAdmin, deleteStudent);
+
+router.get("/students/:id", authUser, isAdmin, getStudentById);
 
 /**
  * @route PATCH /api/admin/users/:id/promote
@@ -60,5 +71,12 @@ router.patch("/users/:id/promote", authUser, isAdmin, promoteToAdmin);
  * @access Private (Admin only)
  */
 router.get("/transactions", authUser, isAdmin, getAllTransactions);
+
+/**
+ * @route GET /api/admin/notifications
+ * @desc Get all notifications
+ * @access Private (Admin only)
+ */
+router.get("/notifications", authUser, isAdmin, getNotificitations);
 
 module.exports = router;
