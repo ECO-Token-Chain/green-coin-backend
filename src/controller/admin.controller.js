@@ -99,8 +99,6 @@ async function addProduct(req, res) {
         if (!name || !price || !file) {
             return res.status(400).json({ message: "Product name, price, and image are required" });
         }
-
-        // Convert price to a Number to avoid validation errors
         const parsedPrice = Number(price);
         if (isNaN(parsedPrice)) {
             return res.status(400).json({ message: "Invalid price format. Price must be a number." });

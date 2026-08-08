@@ -1,4 +1,5 @@
 const { ethers } = require("ethers");
+const Transaction = require("../models/transaction.model.js"); // 🚀 Import the Transaction model
 require("dotenv").config();
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
@@ -15,7 +16,7 @@ const contractABI = [
 
 const greenCoinContract = new ethers.Contract(contractAddress, contractABI, wallet);
 
-async function sendReward(studentAddress, points) {
+async function sendReward(studentAddress, points, uid) {
   try {
 
     const tokenAmount = points.toString();
@@ -29,10 +30,35 @@ async function sendReward(studentAddress, points) {
     const receipt = await tx.wait();
 
     console.log(`[Blockchain]  Success! Transaction confirmed in block ${receipt.blockNumber}`);
+
+
+    await Transaction.create({
+      uid: uid,
+      walletAddress: studentAddress,
+      amount: points,
+      pointsUsed: points,
+      txHash: tx.hash,
+      status: "success",
+      type: "reward"
+    });
+
     return true;
 
   } catch (error) {
     console.error(`[Blockchain]  Error sending reward to ${studentAddress}:`, error.message);
+
+
+    await Transaction.create({
+      uid: uid,
+      walletAddress: studentAddress,
+      amount: points,
+      pointsUsed: points,
+      txHash: "",
+      status: "failed",
+      type: "reward",
+      error: error.message
+    });
+
     return false;
   }
 }
