@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * @returns {{ objectName: string, minGrams: number, maxGrams: number }}
  */
 async function estimateWeightRange(imageBuffer, mimeType) {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
   const prompt = `You are a smart waste-management AI.
 Look at the item in this image and:
